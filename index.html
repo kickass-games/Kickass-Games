@@ -601,7 +601,7 @@ html.pseudofs,html.pseudofs body{height:100%;overflow:hidden;background:#000}
       <!-- RANKING -->
       <section class="mp" data-p="rank" hidden>
         <div class="ptitle"><span class="gtxt" id="rkT">LA PIZARRA</span><span id="rkChip" class="chip">Cargando</span></div>
-        <div id="rkTabs" class="rktabs"><button type="button" data-t="story">HISTORIA</button><button type="button" data-t="n1">NIVEL 1</button><button type="button" data-t="n2">NIVEL 2</button><button type="button" data-t="final">LEVEL WOD</button></div>
+        <div id="rkTabs" class="rktabs"><button type="button" data-t="story">HISTORIA</button><button type="button" data-t="n1">NIVEL 1</button><button type="button" data-t="n2">NIVEL 2</button><button type="button" data-t="n3">NIVEL 3</button><button type="button" data-t="final">LEVEL WOD</button></div>
         <div class="pbody card scrollin"><ol id="rkMenu" class="rank"></ol></div>
         <div class="mnav"><button type="button" class="nbtn" data-go="hub">&#9664; VOLVER</button></div>
       </section>
@@ -1030,7 +1030,7 @@ const LKEY='nrb_scores_v1';
 function localRows(){try{return JSON.parse(localStorage.getItem(LKEY)||'[]')}catch(e){return[]}}
 function saveLocal(rec){try{const a=localRows();a.push(rec);a.sort(cmpRec);localStorage.setItem(LKEY,JSON.stringify(a.slice(0,40)))}catch(e){}}
 function cmpRec(a,b){return (b.score-a.score)||(a.time-b.time)}
-const RK_TABS=[['story','HISTORIA'],['n1','NIVEL 1'],['n2','NIVEL 2'],['final','LEVEL WOD']];let rkTab='story';
+const RK_TABS=[['story','HISTORIA'],['n1','NIVEL 1'],['n2','NIVEL 2'],['n3','NIVEL 3'],['final','LEVEL WOD']];let rkTab='story';
 function shownRows(tab){tab=tab||rkTab;return(RK.mode==='shared'?RK.rows:localRows()).filter(r=>(r.mode||'story')===tab).sort(cmpRec).slice(0,10)}
 const PAIRN={M:'Masculina',F:'Femenina',X:'Mixta'};
 function renderRank(ol,meKey,tab){
