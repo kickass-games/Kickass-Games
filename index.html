@@ -3824,7 +3824,7 @@ NET_SKIP.add('boss');NET_SKIP.add('hbHit');
   _m(m)}}
 // invitado: música del nivel y movimiento suave de transpaletas y kettlebells entre fotos del estado
 {const _g=netGuestUpdate;netGuestUpdate=function(dt){_g(dt);if(!G)return;
-  const k=G.phase==='wod'?'main':G.lvl===2?'box':'main';if(NET.trk!==k){NET.trk=k;try{musicTrack(k)}catch(e){}}
+  const k=G.phase==='wod'?'wod':G.lvl===2?'box':'main';if(NET.trk!==k){NET.trk=k;try{musicTrack(k)}catch(e){}}
   for(const L of [G.pals,G.kbs])for(const p of L||[]){if(p._bx==null){p._bx=p.x;p._age=0}p._age+=dt;p.x=p._bx+(p.vx||0)*Math.min(p._age,.15);if(p.t!=null)p.t+=dt}}}
 
 /* chispas, anillos y textos flotantes: en vez de mandar la lista entera 30 veces por segundo, el anfitrión manda el "evento"
@@ -4368,7 +4368,7 @@ function buildWodBG(){
 }
 let lastOpts=null;
 function setActLabel(s){const el=document.querySelector('.t-z small');if(el)el.textContent=s}
-function startWod(){try{musicTrack('main')}catch(e){}
+function startWod(){try{musicTrack('wod')}catch(e){}
   const c=G.cat;
   G.phase='wod';G.fade=0;app.classList.add('wod');clearKeys();G.parts.length=0;G.txt.length=0;G.en.length=0;G.proj.length=0;G.pick.length=0;
   G.ath.forEach((a,i)=>{a.x=-30-i*40;a.y=226;a.st='walk';a.wpn='none';a.inv=0;a.flash=0;a.face=1;a.t=0});
