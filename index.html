@@ -1838,7 +1838,7 @@ function startPhoto(){photoSndLoad();G.mode2='photo';const v=smpPlay('foto_voz',
 function photoFlash(){
   const lead=G.ath[0];G.flash=1;G.shake=.5;G.photo=0;G.photoFull=false;if(!G.ph||!G.ph.sample)SFX.flash();musicDuck(.25,900);G.polaroid=POLA_T;{const n=(POLA[G.o.pair]||POLA.X).length;let i=Math.floor(Math.random()*n);if(n>1&&i===G.polaI)i=(i+1)%n;G.polaI=i}
   if(G.tut&&!G.tut.done){for(const e of G.en)if(e.tut&&e.st!=='dying'){killE(e,e.x>=lead.x?1:-1)}tutEv(lead,'foto')}
-  for(const e of G.en){if(e.st==='dying')continue;if(Math.abs(e.x-lead.x)<320){const dir=e.x>=lead.x?1:-1;if(e.type==='chief'||e.type==='rower'){e.hp-=bossCap(e,20);if(e.hp<=0){killE(e,dir);continue}e.flash=.3;ftext(e.x,e.y-110,'-20','#ffd23f',11);continue}e.hp-=45;if(e.hp<=0)killE(e,dir);else{e.st='stun';e.t=0;e.stunDur=3;e.vx=dir*360;e.vy=0;e.flash=.3;G.score+=150;ftext(e.x,e.y-70,'+150','#ffd23f',11)}}}
+  for(const e of G.en){if(e.st==='dying'||e.type==='mirror')continue;if(Math.abs(e.x-lead.x)<320){const dir=e.x>=lead.x?1:-1;if(e.type==='chief'||e.type==='rower'){e.hp-=bossCap(e,20);if(e.hp<=0){killE(e,dir);continue}e.flash=.3;ftext(e.x,e.y-110,'-20','#ffd23f',11);continue}e.hp-=45;if(e.hp<=0)killE(e,dir);else{e.st='stun';e.t=0;e.stunDur=3;e.vx=dir*360;e.vy=0;e.flash=.3;G.score+=150;ftext(e.x,e.y-70,'+150','#ffd23f',11)}}}
   const pg=G.photog;ring(pg.x,pg.y-36,260);burst(pg.x,pg.y-36,26,'#ffffff',320);
 }
 function updPhoto(dt){
@@ -2327,7 +2327,7 @@ function mirHit(m){if(m.hits>=MIR_HITS)return;m.hits++;m.flash=.12;m.shake=.2;G.
   }
   return _h(e,dmg,dir,kd,kb)}}
 {const _b=bossCap;bossCap=function(e,dmg){if(e.type==='e1'){if(e.clone||e1Mirror())return 0;const cap=e.egoDone?0:Math.floor(e.maxHp/3);return Math.max(0,Math.min(dmg,e.hp-cap))}return _b(e,dmg)}}
-{const _k=killE;killE=function(e,dir){_k(e,dir);if(e.type==='e1'&&!e.clone){for(const o of G.en)if(o!==e&&(o.type==='mirror'||o.type==='e1')){o.st='dying';o.t=0;o.poof=1}G.mirFx=[];bigMsg('¡NARCISUS HA CAÍDO!',2);G.e1Down=1}}}
+{const _k=killE;killE=function(e,dir){if(e.type==='mirror'){if(e.st==='mir'){e.hits=MIR_HITS-1;mirHit(e)}return}_k(e,dir);if(e.type==='e1'&&!e.clone){for(const o of G.en)if(o!==e&&(o.type==='mirror'||o.type==='e1')){o.st='dying';o.t=0;o.poof=1}G.mirFx=[];bigMsg('¡NARCISUS HA CAÍDO!',2);G.e1Down=1}}}
 function updE1Extra(dt){for(const e of G.en)if(e.type==='e1'){if(e.st==='grabbed'||e.st==='kicked')e.kas=1;else if(e.st==='walk'||E1_AI.has(e.st))e.kas=0}
 for(const m of G.en)if(m.type==='mirror'){if(m.hx==null){m.hx=m.x;m.hy=m.y}m.x=m.hx;m.y=m.hy;m.vx=m.vy=0}
 if(G.mirFx)for(const f of G.mirFx)f.t+=dt;for(const e of G.en){if(e.invT>0)e.invT-=dt;if(e.type==='mirror'){e.t+=dt;if(e.shake>0)e.shake-=dt;if(e.st==='dying'&&e.t>.45)e.dead=true}}}
