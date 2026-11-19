@@ -374,6 +374,7 @@ html.pseudofs,html.pseudofs body{height:100%;overflow:hidden;background:#000}
 .rktabs button{font:700 13px/1 system-ui,sans-serif;letter-spacing:.06em;padding:8px 12px;border-radius:999px;border:2px solid #ffd23f55;background:#0d0f24cc;color:#ffd23f;cursor:pointer}
 .rktabs button.on{background:#ffd23f;color:#140a06;border-color:#ffd23f}
 .rktabs button:focus-visible{outline:3px solid #7fe6ff;outline-offset:2px}
+#rkRes{max-height:min(46vh,420px);overflow:auto;padding-right:4px}
 #rkResMode{display:block;font:700 12px/1.2 system-ui,sans-serif;letter-spacing:.08em;color:#7fe6ff;margin:2px 0 6px;text-align:center}
 /* jerarquía del menú principal: JUGAR grande y el resto cada vez más pequeño */
 #hubNet img.wimg{height:clamp(30px,8vh,60px)}
@@ -1031,7 +1032,7 @@ function localRows(){try{return JSON.parse(localStorage.getItem(LKEY)||'[]')}cat
 function saveLocal(rec){try{const a=localRows();a.push(rec);a.sort(cmpRec);localStorage.setItem(LKEY,JSON.stringify(a.slice(0,40)))}catch(e){}}
 function cmpRec(a,b){return (b.score-a.score)||(a.time-b.time)}
 const RK_TABS=[['story','HISTORIA'],['n1','NIVEL 1'],['n2','NIVEL 2'],['n3','NIVEL 3'],['final','LEVEL WOD']];let rkTab='story';
-function shownRows(tab){tab=tab||rkTab;return(RK.mode==='shared'?RK.rows:localRows()).filter(r=>(r.mode||'story')===tab).sort(cmpRec).slice(0,10)}
+function shownRows(tab){tab=tab||rkTab;return(RK.mode==='shared'?RK.rows:localRows()).filter(r=>(r.mode||'story')===tab).sort(cmpRec)}
 const PAIRN={M:'Masculina',F:'Femenina',X:'Mixta'};
 function renderRank(ol,meKey,tab){
   const rows=shownRows(tab);ol.textContent='';
@@ -1040,6 +1041,7 @@ function renderRank(ol,meKey,tab){
     const b=document.createElement('b');b.textContent=i+1;
     const tn=document.createElement('div');tn.className='tn';const s=document.createElement('span');s.textContent=String(r.team||'-');const sm=document.createElement('small');sm.textContent=(PAIRN[r.pair]||'')+' · '+(r.cat||'')+(r.done?' · ✓ reto':' · sin terminar')+' · '+fmtT(r.time||0)+' · '+(r.noRep|0)+' NO REP';tn.append(s,sm);
     const em=document.createElement('em');em.textContent=fmtN(r.score||0);li.append(b,tn,em);ol.appendChild(li)});
+  const me=ol.querySelector('li.me');if(me)requestAnimationFrame(()=>{try{me.scrollIntoView({block:'nearest'})}catch(e){}});
 }
 function chipUpdate(){[$('#rkChip'),$('#rkChip2')].forEach(c=>{c.className='chip'+(RK.mode==='shared'?' ok':RK.mode==='local'?' loc':'');c.textContent=RK.mode==='shared'?'General':RK.mode==='local'?'Solo este navegador':'Cargando'})}
 function refreshRank(){chipUpdate();rkTabsUI();renderRank($('#rkMenu'),null);renderRank($('#rkRes'),G&&G.rkKey,G&&G.final&&G.final.mode)}
@@ -1050,7 +1052,7 @@ async function initRanking(){
     const db=await claude.use('db');const user=await claude.use('user');
     if(!db){RK.mode='local';return refreshRank()}
     RK.db=db;RK.uid=user?await user.id():null;
-    db.collection('scores').orderBy('score','desc').limit(60).onSnapshot(snap=>{
+    db.collection('scores').orderBy('score','desc').onSnapshot(snap=>{
       RK.rows=snap.docs.map(d=>{const x=d.data()||{};return{key:d.id,team:String(x.team||''),pair:x.pair,cat:x.cat,score:+x.score||0,time:+x.time||0,noRep:+x.noRep||0,done:!!x.done}});
       RK.mode='shared';refreshRank();
     },()=>{RK.mode='local';refreshRank()});
@@ -3086,7 +3088,7 @@ const FB_ON=()=>!!(RANK_FB.projectId&&RANK_FB.apiKey);
 const fbURL=p=>'https://firestore.googleapis.com/v1/projects/'+RANK_FB.projectId+'/databases/(default)/documents'+p+(p.includes('?')?'&':'?')+'key='+RANK_FB.apiKey;
 function fbVal(v){if(!v)return null;if('stringValue' in v)return v.stringValue;if('integerValue' in v)return +v.integerValue;if('doubleValue' in v)return +v.doubleValue;if('booleanValue' in v)return v.booleanValue;return null}
 async function fbLoad(){
-  const body={structuredQuery:{from:[{collectionId:'scores'}],orderBy:[{field:{fieldPath:'score'},direction:'DESCENDING'}],limit:600}};
+  const body={structuredQuery:{from:[{collectionId:'scores'}],orderBy:[{field:{fieldPath:'score'},direction:'DESCENDING'}]}};
   const r=await fetch(fbURL(':runQuery'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error('fb '+r.status);
   const a=await r.json(),rows=[];
   for(const x of a){const d=x.document;if(!d)continue;const f=d.fields||{},g=k=>fbVal(f[k]);
