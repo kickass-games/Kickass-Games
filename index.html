@@ -3100,8 +3100,8 @@ async function fbSave(rec){
   if(rec.wod)F.wod={stringValue:String(rec.wod).slice(0,2000)};
   let r=await fetch(fbURL('/scores'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:F})});
   if(!r.ok&&F.wod&&(r.status===400||r.status===403)){delete F.wod;r=await fetch(fbURL('/scores'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:F})});if(r.ok)console.warn('ranking: las reglas de Firebase no aceptan el campo wod (fantasma del WOD)')}
-  if(!r.ok&&(r.status===400||r.status===403)){const F2=Object.assign({},F);delete F2.mode;r=await fetch(fbURL('/scores'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:F2})});if(r.ok)console.warn('ranking: las reglas de Firebase no aceptan el campo mode')}
-  if(!r.ok)throw new Error('fb '+r.status);
+  if(!r.ok&&(r.status===400||r.status===403)&&F.mode.stringValue==='story'){const F2=Object.assign({},F);delete F2.mode;r=await fetch(fbURL('/scores'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:F2})});if(r.ok)console.warn('ranking: las reglas de Firebase no aceptan el campo mode')}
+  if(!r.ok){console.warn('ranking: Firebase rechazó la puntuación',r.status,F.mode.stringValue);throw new Error('fb '+r.status)}
   const d=await r.json();return d.name.split('/').pop()}
 /* ===== EMAIL PARA PREMIOS =====
    Opcional. Nunca se guarda en 'scores' (que se lee en público): va a la colección 'contacts',
@@ -3129,7 +3129,7 @@ async function fbRefresh(){try{RK.rows=await fbLoad();RK.mode='shared'}catch(e){
     try{const id=await fbSave(rec);G.rkKey=id;msg.textContent='Guardado en el ranking general.';
       if(PRIZE_MAIL)fbSaveContact(id,rec,PRIZE_MAIL).then(()=>{if(G.rkKey===id)msg.textContent+=' 🏆 Optáis a premio: os escribiremos si ganáis.'}).catch(e=>console.warn('premios: no se pudo guardar el email',e));await fbRefresh();
       if(!RK.rows.some(r=>r.key===id))msg.textContent='Guardado en el ranking general (tu mejor marca de este equipo sigue siendo más alta).'}
-    catch(e){saveLocal(Object.assign({key:'loc'+rec.at},rec));G.rkKey='loc'+rec.at;msg.textContent='Sin conexión con el ranking general: se guardó solo en este móvil.';refreshRank()}};
+    catch(e){saveLocal(Object.assign({key:'loc'+rec.at},rec));G.rkKey='loc'+rec.at;msg.textContent=/^fb 4/.test(e&&e.message||'')?'El ranking general no aceptó la puntuación ('+e.message.slice(3)+'): se guardó solo en este móvil.':'Sin conexión con el ranking general: se guardó solo en este móvil.';refreshRank()}};
   // al abrir el ranking del menú, refrescar
   const _mg=menuGo;menuGo=function(p){_mg(p);if(p==='rank'&&FB_ON())fbRefresh()}}
 /* ===== COOPERATIVO ONLINE ENTRE DOS MÓVILES =====
